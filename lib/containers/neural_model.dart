@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Prediction {
   final String foodName;
   final double mass;
@@ -6,7 +8,7 @@ class Prediction {
 }
 
 class NeuralModel {
-  Prediction predictByImage(String pathToImage) {
+  Prediction predictByImage(Image image) {
     return Prediction("Помидор", 100);
   }
 }

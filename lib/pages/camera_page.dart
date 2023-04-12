@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:camera/camera.dart';
@@ -10,7 +11,6 @@ import 'package:food_ai/widgets/fruit_control_widgets/fruit_control_widget.dart'
 
 import '../painters/hole_painter.dart';
 import '../widgets/camera_control_widgets/camera_control_widget.dart';
-import '../widgets/dialogues/ask_for_delete_dialogue.dart';
 import '../widgets/image_preview_widget.dart';
 
 class CameraPage extends StatefulWidget {
@@ -55,8 +55,9 @@ class _CameraPage extends State<CameraPage> {
 
   Widget _getBottomWidget() {
     if (_isPictureMade) {
-      Prediction prediction =
-          resources.neuralModel.predictByImage(_currentImage.path);
+      Image imageFile = Image.file(File(_currentImage.path));
+
+      Prediction prediction = resources.neuralModel.predictByImage(imageFile);
       return FruitControlWidget(
         onFoodSaveSuccess: (foodRecord) =>
             widget.onRecordMakeSucess(foodRecord),

@@ -1,16 +1,15 @@
-# food_ai
+# Food Room
 
-A new Flutter project.
+The mobile application for tracing food's proteins, fats, carbohydrates, calories with help of AI.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Calculation of proteins, fats, carbohydrates, calories based on mass of a food.
+- Creation of records for breakfast, lunch and dinner in organized manner.
+- Automatic food mass detection using AI by a phone camera.
 
-A few resources to get you started if this is your first Flutter project:
+## How to use
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Usage explanation...
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Download links
