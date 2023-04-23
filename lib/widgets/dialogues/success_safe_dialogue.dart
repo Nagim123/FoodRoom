@@ -34,7 +34,6 @@ Future<void> showSuccessSafe(BuildContext context) async {
             child: InkWell(
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pop(context);
               },
               child: const Icon(
                 Icons.close,
@@ -47,8 +46,9 @@ Future<void> showSuccessSafe(BuildContext context) async {
     ),
   );
   showDialog(
-      context: context,
-      barrierColor: Colors.transparent,
-      barrierDismissible: false,
-      builder: (BuildContext context) => fancyDialog);
+          context: context,
+          barrierColor: Colors.transparent,
+          barrierDismissible: false,
+          builder: (BuildContext context) => fancyDialog)
+      .then((value) => Navigator.pop(context));
 }

@@ -8,6 +8,7 @@ import 'package:food_ai/containers/neural_model.dart';
 import 'package:food_ai/containers/resources.dart';
 import 'package:food_ai/widgets/camera_control_widgets/camera_preview_widget.dart';
 import 'package:food_ai/widgets/fruit_control_widgets/fruit_control_widget.dart';
+import 'package:food_ai/widgets/camera_control_widgets/ar_core_widget.dart';
 
 import '../painters/hole_painter.dart';
 import '../widgets/camera_control_widgets/camera_control_widget.dart';
@@ -27,8 +28,10 @@ class _CameraPage extends State<CameraPage> {
   final FruitControlController fruitControlController =
       FruitControlController();
   late XFile _currentImage;
+  late double _foodDistance;
 
   late bool _isPictureMade;
+  late bool _wasTapped;
 
   bool isVisibleMagic = false;
 
@@ -36,10 +39,19 @@ class _CameraPage extends State<CameraPage> {
   void initState() {
     super.initState();
     _isPictureMade = false;
+    _wasTapped = false;
     cameraPreviewWidgetController = CameraPreviewWidgetController();
   }
 
   Widget _getTopWidget() {
+    if (_wasTapped == false) {
+      return ArCoreWidget(onDistanceReady: (distance) {
+        _wasTapped = true;
+        _foodDistance = distance;
+        setState(() {});
+      });
+    }
+
     if (_isPictureMade) {
       return ImagePreviewWidget(file: _currentImage);
     }
@@ -53,11 +65,49 @@ class _CameraPage extends State<CameraPage> {
     );
   }
 
+  Widget _getFilterWidget() {
+    if (_wasTapped == false) {
+      return const SizedBox(
+        width: 1,
+        height: 1,
+      );
+    }
+
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      child: Container(
+        alignment: Alignment.center,
+        color: Colors.black.withOpacity(0.7),
+        child: _isPictureMade
+            ? Container()
+            : Container(
+                alignment: Alignment.bottomCenter,
+                margin: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).size.height * 0.2 + 30,
+                    top: MediaQuery.of(context).size.height * 0.1),
+                child: CustomPaint(
+                  size: Size(MediaQuery.of(context).size.width * 0.85,
+                      MediaQuery.of(context).size.height),
+                  painter: Hole(),
+                ),
+              ),
+      ),
+    );
+  }
+
   Widget _getBottomWidget() {
+    if (_wasTapped == false) {
+      return const SizedBox(
+        width: 1,
+        height: 1,
+      );
+    }
+
     if (_isPictureMade) {
       Image imageFile = Image.file(File(_currentImage.path));
 
-      Prediction prediction = resources.neuralModel.predictByImage(imageFile);
+      Prediction prediction =
+          resources.neuralModel.predictByImage(imageFile, _foodDistance);
       return FruitControlWidget(
         onFoodSaveSuccess: (foodRecord) =>
             widget.onRecordMakeSucess(foodRecord),
@@ -67,6 +117,7 @@ class _CameraPage extends State<CameraPage> {
       );
     }
 
+    return Container();
     return SizedBox(
       width: double.infinity,
       height: 150,
@@ -110,27 +161,7 @@ class _CameraPage extends State<CameraPage> {
                 margin: const EdgeInsets.only(top: 20),
                 child: _getTopWidget(),
               ),
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  alignment: Alignment.center,
-                  color: Colors.black.withOpacity(0.7),
-                  child: _isPictureMade
-                      ? Container()
-                      : Container(
-                          alignment: Alignment.bottomCenter,
-                          margin: EdgeInsets.only(
-                              bottom:
-                                  MediaQuery.of(context).size.height * 0.2 + 30,
-                              top: MediaQuery.of(context).size.height * 0.1),
-                          child: CustomPaint(
-                            size: Size(MediaQuery.of(context).size.width * 0.85,
-                                MediaQuery.of(context).size.height),
-                            painter: Hole(),
-                          ),
-                        ),
-                ),
-              ),
+              _getFilterWidget(),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(

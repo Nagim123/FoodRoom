@@ -57,7 +57,13 @@ class _FruitControlWidget extends State<FruitControlWidget> {
     widget.controller.forceExitFunction = () {
       isVisible = false;
       setState(() {});
-      showDeleteQuestion(context, () => Navigator.of(context).pop(), () {
+      showDeleteQuestion(context, "Вы уверены, что хотите отменить действие?",
+          () {
+        Navigator.of(context).pop();
+      }, () {
+        isVisible = true;
+        setState(() {});
+      }, () {
         isVisible = true;
         setState(() {});
       });
@@ -157,7 +163,12 @@ class _FruitControlWidget extends State<FruitControlWidget> {
                       isVisible = false;
                       setState(() {});
                       showDeleteQuestion(
-                          context, () => Navigator.of(context).pop(), () {
+                          context,
+                          "Вы уверены, что хотите отменить действие?",
+                          () => Navigator.of(context).pop(), () {
+                        isVisible = true;
+                        setState(() {});
+                      }, () {
                         isVisible = true;
                         setState(() {});
                       });

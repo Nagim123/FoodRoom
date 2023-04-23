@@ -8,7 +8,8 @@ class Prediction {
 }
 
 class NeuralModel {
-  Prediction predictByImage(Image image) {
+  Prediction predictByImage(Image image, double distance) {
+    print("GOT DISTANCE:$distance");
     return Prediction("Помидор", 100);
   }
 }

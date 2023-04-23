@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
-Future<void> showDeleteQuestion(BuildContext context, VoidCallback exitCallback,
-    VoidCallback cancelCallback) async {
+Future<void> showDeleteQuestion(
+    BuildContext context,
+    String textDialog,
+    VoidCallback exitCallback,
+    VoidCallback cancelCallback,
+    VoidCallback onPopped) async {
   Dialog fancyDialog = Dialog(
     alignment: Alignment.center,
     backgroundColor: Colors.transparent,
@@ -20,8 +24,8 @@ Future<void> showDeleteQuestion(BuildContext context, VoidCallback exitCallback,
             alignment: Alignment.topCenter,
             child: Container(
               margin: const EdgeInsets.all(20),
-              child: const Text(
-                "Вы уверены, что хотите отменить действие?",
+              child: Text(
+                textDialog,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 21, color: Colors.white),
               ),
@@ -67,8 +71,9 @@ Future<void> showDeleteQuestion(BuildContext context, VoidCallback exitCallback,
     ),
   );
   showDialog(
-      context: context,
-      barrierColor: Colors.transparent,
-      barrierDismissible: false,
-      builder: (BuildContext context) => fancyDialog);
+          context: context,
+          barrierColor: Colors.transparent,
+          barrierDismissible: false,
+          builder: (BuildContext context) => fancyDialog)
+      .then((value) => onPopped.call());
 }

@@ -43,6 +43,10 @@ class RecordCluster {
     _records.add(foodRecord);
   }
 
+  void deleteOneRecord(FoodRecord foodRecord) {
+    _records.remove(foodRecord);
+  }
+
   List<FoodRecord> getAllRecords() {
     return _records;
   }
@@ -141,6 +145,10 @@ class DayRecording {
     return dateTime.year == dayDate.year &&
         dateTime.month == dayDate.month &&
         dateTime.day == dayDate.day;
+  }
+
+  bool isEmpty() {
+    return breakfast.isEmpty() && lunch.isEmpty() && dinner.isEmpty();
   }
 
   DayRecording(this.breakfast, this.lunch, this.dinner, this.dayDate);

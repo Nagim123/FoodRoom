@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:food_ai/containers/record_pointers.dart';
@@ -31,7 +31,8 @@ Future<void> main() async {
   Hive.registerAdapter(RecordPointersAdapter());
   //await resources.hiveFoodManager.deleteSavedData();
   await resources.hiveFoodManager.checkAndInitPointersBox();
-
+  await SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(const FoodApp());
 }
 

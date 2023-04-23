@@ -43,7 +43,9 @@ class BlockOfClustersWidget extends StatelessWidget {
             dayRecording.breakfast.isEmpty()
                 ? Container()
                 : FoodClusterWidget(
-                    recordCluster: dayRecording.breakfast, mealName: "Завтрак"),
+                    dayRecording: dayRecording,
+                    recordCluster: dayRecording.breakfast,
+                    mealName: "Завтрак"),
             dayRecording.breakfast.isEmpty() ||
                     (dayRecording.dinner.isEmpty() &&
                         dayRecording.lunch.isEmpty())
@@ -52,14 +54,18 @@ class BlockOfClustersWidget extends StatelessWidget {
             dayRecording.lunch.isEmpty()
                 ? Container()
                 : FoodClusterWidget(
-                    recordCluster: dayRecording.lunch, mealName: "Обед"),
+                    dayRecording: dayRecording,
+                    recordCluster: dayRecording.lunch,
+                    mealName: "Обед"),
             dayRecording.lunch.isEmpty() || dayRecording.dinner.isEmpty()
                 ? Container()
                 : const Divider(height: 5),
             dayRecording.dinner.isEmpty()
                 ? Container()
                 : FoodClusterWidget(
-                    recordCluster: dayRecording.dinner, mealName: "Ужин"),
+                    dayRecording: dayRecording,
+                    recordCluster: dayRecording.dinner,
+                    mealName: "Ужин"),
           ]),
         )
       ]),

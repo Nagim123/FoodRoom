@@ -3,9 +3,15 @@ import 'package:food_ai/containers/food_recording.dart';
 import 'package:food_ai/widgets/dialogues/record_preview_dialogue.dart';
 
 class FoodRecordWidget extends StatelessWidget {
-  const FoodRecordWidget({super.key, required this.foodRecord});
+  const FoodRecordWidget(
+      {super.key,
+      required this.foodRecord,
+      required this.recordCluster,
+      required this.dayRecording});
 
   final FoodRecord foodRecord;
+  final RecordCluster recordCluster;
+  final DayRecording dayRecording;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +54,8 @@ class FoodRecordWidget extends StatelessWidget {
                       Icons.arrow_forward_ios,
                       size: 12,
                     ),
-                    onTap: () => showFoodPreview(context, foodRecord),
+                    onTap: () => showFoodPreview(
+                        context, foodRecord, recordCluster, dayRecording),
                   ),
                 ),
               )),
