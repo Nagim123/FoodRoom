@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:food_ai/containers/food_recording.dart';
 import 'package:food_ai/containers/neural_model.dart';
 import 'package:food_ai/containers/resources.dart';
+import 'package:food_ai/utils/focal_len_getter.dart';
 import 'package:food_ai/widgets/camera_control_widgets/camera_preview_widget.dart';
 import 'package:food_ai/widgets/fruit_control_widgets/fruit_control_widget.dart';
 import 'package:food_ai/widgets/camera_control_widgets/ar_core_widget.dart';
@@ -32,6 +33,7 @@ class _CameraPage extends State<CameraPage> {
 
   late bool _isPictureMade;
   late bool _wasTapped;
+  late double _focalLength;
 
   bool isVisibleMagic = false;
 
@@ -40,6 +42,7 @@ class _CameraPage extends State<CameraPage> {
     super.initState();
     _isPictureMade = false;
     _wasTapped = false;
+    _focalLength = 0;
     cameraPreviewWidgetController = CameraPreviewWidgetController();
   }
 
@@ -57,7 +60,8 @@ class _CameraPage extends State<CameraPage> {
     }
     return CameraPreviewWidget(
       controller: cameraPreviewWidgetController,
-      onPhotoReady: (XFile image) {
+      onPhotoReady: (XFile image) async {
+        _focalLength = await get_focal_length(image.path);
         _currentImage = image;
         _isPictureMade = true;
         setState(() {});
@@ -106,8 +110,8 @@ class _CameraPage extends State<CameraPage> {
     if (_isPictureMade) {
       Image imageFile = Image.file(File(_currentImage.path));
 
-      Prediction prediction =
-          resources.neuralModel.predictByImage(imageFile, _foodDistance);
+      Prediction prediction = resources.neuralModel
+          .predictByImage(imageFile, _foodDistance, _focalLength);
       return FruitControlWidget(
         onFoodSaveSuccess: (foodRecord) =>
             widget.onRecordMakeSucess(foodRecord),
