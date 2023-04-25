@@ -109,6 +109,7 @@ class Detector {
     y = (height * prediction[1]).toInt();
     w = (width * prediction[2]).toInt();
     h = (height * prediction[2]).toInt();
+
     cls = 0;
     var max_cls = 0.0;
     for (int i = 0 + 5; i < 12 + 5; i++) {
@@ -150,6 +151,9 @@ class Detector {
     h = parsedOutput[3];
     cls = parsedOutput[4];
 
+    print(
+        "Predicted class: ${_labels[cls]}, pos: ($x, $y), width: $w px, height: $h px, confidence: ${listOutputs[0][4]}");
+
     return <int>[w, h, cls];
   }
 }
@@ -157,8 +161,8 @@ class Detector {
 class NeuralModel {
   final Detector _detector = Detector();
 
-  Future predictByImage(String imagePath, double distance, double focalLength) async{
-    
+  Future predictByImage(
+      String imagePath, double distance, double focalLength) async {
     print("GOT DISTANCE:$distance and focallll ${focalLength}");
     imlb.Image? image = await imlb.decodeImageFile(imagePath);
 
@@ -172,8 +176,6 @@ class NeuralModel {
     w = prediction[0];
     h = prediction[1];
     cls = prediction[2];
-    print(prediction);
-    print("Predicted class: ${_detector._labels[cls]}");
 
     return Prediction(_detector._labels[cls], 100);
   }
