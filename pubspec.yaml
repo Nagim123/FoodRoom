@@ -41,6 +41,8 @@ dependencies:
   build_runner: ^2.1.8
   path_provider: ^2.0.13
   intl: ^0.18.0
+  tflite_flutter: ^0.9.1
+  # tflite_flutter_helper: ^0.3.1
 
 dev_dependencies:
   flutter_test:
@@ -78,9 +80,8 @@ flutter:
       fonts:
         - asset: fonts/Raleway.ttf
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

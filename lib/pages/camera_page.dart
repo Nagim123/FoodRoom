@@ -53,11 +53,12 @@ class _CameraPage extends State<CameraPage> {
     );
   }
 
-  Widget _getBottomWidget() {
+  Future<Widget> _getBottomWidget() async {
     if (_isPictureMade) {
       Image imageFile = Image.file(File(_currentImage.path));
 
-      Prediction prediction = resources.neuralModel.predictByImage(imageFile);
+      Prediction prediction =
+          await resources.neuralModel.predictByImage(_currentImage.path);
       return FruitControlWidget(
         onFoodSaveSuccess: (foodRecord) =>
             widget.onRecordMakeSucess(foodRecord),
@@ -71,7 +72,7 @@ class _CameraPage extends State<CameraPage> {
       width: double.infinity,
       height: 150,
       child: CameraControlWidget(
-        onPressed: () => cameraPreviewWidgetController.takePhoto(),
+        onPressed: () => cameraPreviewWidgetController.takePhoto()
       ),
     );
   }
@@ -131,16 +132,20 @@ class _CameraPage extends State<CameraPage> {
                         ),
                 ),
               ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  height: MediaQuery.of(context).size.height *
-                      (_isPictureMade ? 1 : 0.2),
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  child: _getBottomWidget(),
-                ),
-              ),
+              FutureBuilder(
+                  future: _getBottomWidget(),
+                  builder: (context, snapshot) {
+                    return Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        height: MediaQuery.of(context).size.height *
+                            (_isPictureMade ? 1 : 0.2),
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: snapshot.data,
+                      ),
+                    );
+                  })
             ],
           ),
         ),
