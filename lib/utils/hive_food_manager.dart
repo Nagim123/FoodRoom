@@ -14,7 +14,13 @@ class HiveFoodManager {
       pointers.recordPointers.add(dayRecording.getId());
     }
 
-    recordingBox.put(dayRecording.getId(), dayRecording);
+    if (recordingBox.get(dayRecording.getId()) != null &&
+        dayRecording.isEmpty()) {
+      recordingBox.delete(dayRecording.getId());
+      pointers.recordPointers.remove(dayRecording.getId());
+    } else {
+      recordingBox.put(dayRecording.getId(), dayRecording);
+    }
 
     await recordingBox.close();
     pointers.recordPointers.sort((b, a) => a.compareTo(b));

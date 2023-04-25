@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:food_ai/containers/food_recording.dart';
+import 'package:food_ai/containers/resources.dart';
+import 'package:food_ai/pages/daily_records_page.dart';
 import 'package:food_ai/widgets/fruit_control_widgets/fruit_control_widget.dart';
 import 'package:food_ai/widgets/fruit_preview_widget.dart';
 
 import '../widgets/decoration/beautiful_circle.dart';
+import '../widgets/dialogues/ask_for_delete_dialogue.dart';
+import '../widgets/fruit_control_widgets/custom_button_A.dart';
 
 class RecordPreviewPage extends StatefulWidget {
-  const RecordPreviewPage({super.key, required this.foodRecord});
+  const RecordPreviewPage(
+      {super.key,
+      required this.foodRecord,
+      required this.recordCluster,
+      required this.dayRecording});
 
   final FoodRecord foodRecord;
+  final RecordCluster recordCluster;
+  final DayRecording dayRecording;
 
   @override
   State<RecordPreviewPage> createState() => _RecordPreviewPage();
@@ -67,6 +77,23 @@ class _RecordPreviewPage extends State<RecordPreviewPage> {
               foodRecord: widget.foodRecord,
             ),
           ),
+          Container(
+            alignment: Alignment.bottomCenter,
+            child: CustomButtonA(
+              buttonText: "Удалить",
+              onPressed: () {
+                showDeleteQuestion(
+                    context, "Вы уверены, что хотите удалить продукт?",
+                    () async {
+                  Navigator.of(context).pop();
+                  widget.recordCluster.deleteOneRecord(widget.foodRecord);
+                  await resources.hiveFoodManager
+                      .saveDayRecording(widget.dayRecording);
+                  globalFunctionToUpdateDays();
+                }, () {}, () {});
+              },
+            ),
+          )
         ],
       ),
     );

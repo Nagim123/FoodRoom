@@ -7,6 +7,8 @@ import 'package:food_ai/widgets/dialogues/create_day_record_dialogue.dart';
 import 'package:food_ai/widgets/records_page_widgets/block_of_clusters_widget.dart';
 import 'package:food_ai/widgets/records_page_widgets/meal_choicer/meal_choicer_widget.dart';
 
+late Function globalFunctionToUpdateDays;
+
 class DailyRecordsPage extends StatefulWidget {
   const DailyRecordsPage({super.key});
 
@@ -20,8 +22,13 @@ class _DailyRecordsPage extends State<DailyRecordsPage> {
   MealChoicerController mealChoicerController = MealChoicerController();
   late List<DayRecording> dayRecordingList;
 
+  void updateDays() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    globalFunctionToUpdateDays = updateDays;
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 61, 58, 91),
       body: Stack(

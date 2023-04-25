@@ -72,6 +72,7 @@ class _CameraPreviewWidget extends State<CameraPreviewWidget> {
           final mediaSize = MediaQuery.of(context).size;
           final scale =
               1 / (_controller.value.aspectRatio * mediaSize.aspectRatio);
+          widget.controller.takePhoto();
           return ClipRect(
             clipper: _MediaSizeClipper(mediaSize),
             child: Transform.scale(

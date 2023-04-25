@@ -5,8 +5,12 @@ import 'package:food_ai/widgets/records_page_widgets/total_text_widget.dart';
 
 class FoodClusterWidget extends StatelessWidget {
   const FoodClusterWidget(
-      {super.key, required this.recordCluster, required this.mealName});
+      {super.key,
+      required this.recordCluster,
+      required this.dayRecording,
+      required this.mealName});
 
+  final DayRecording dayRecording;
   final RecordCluster recordCluster;
   final String mealName;
 
@@ -14,8 +18,11 @@ class FoodClusterWidget extends StatelessWidget {
     List<Widget> recordings = [];
 
     for (int i = 0; i < recordCluster.getAllRecords().length; i++) {
-      recordings
-          .add(FoodRecordWidget(foodRecord: recordCluster.getAllRecords()[i]));
+      recordings.add(FoodRecordWidget(
+        foodRecord: recordCluster.getAllRecords()[i],
+        recordCluster: recordCluster,
+        dayRecording: dayRecording,
+      ));
     }
 
     return recordings;
