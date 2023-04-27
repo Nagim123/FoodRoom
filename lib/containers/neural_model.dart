@@ -161,7 +161,7 @@ class Detector {
 class NeuralModel {
   final Detector _detector = Detector();
 
-  Future predictByImage(
+  Future<Prediction> predictByImage(
       String imagePath, double distance, double focalLength) async {
     print("GOT DISTANCE:$distance and focallll ${focalLength}");
     imlb.Image? image = await imlb.decodeImageFile(imagePath);
