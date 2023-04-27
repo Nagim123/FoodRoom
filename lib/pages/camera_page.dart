@@ -99,7 +99,7 @@ class _CameraPage extends State<CameraPage> {
     );
   }
 
-  Widget _getBottomWidget() {
+  Future<Widget> _getBottomWidget() async {
     if (_wasTapped == false) {
       return const SizedBox(
         width: 1,
@@ -110,8 +110,8 @@ class _CameraPage extends State<CameraPage> {
     if (_isPictureMade) {
       Image imageFile = Image.file(File(_currentImage.path));
 
-      Prediction prediction = resources.neuralModel
-          .predictByImage(imageFile, _foodDistance, _focalLength);
+      Prediction prediction =
+          await resources.neuralModel.predictByImage(_currentImage.path, _foodDistance, _focalLength);
       return FruitControlWidget(
         onFoodSaveSuccess: (foodRecord) =>
             widget.onRecordMakeSucess(foodRecord),
@@ -126,7 +126,7 @@ class _CameraPage extends State<CameraPage> {
       width: double.infinity,
       height: 150,
       child: CameraControlWidget(
-        onPressed: () => cameraPreviewWidgetController.takePhoto(),
+        onPressed: () => cameraPreviewWidgetController.takePhoto()
       ),
     );
   }
@@ -165,17 +165,41 @@ class _CameraPage extends State<CameraPage> {
                 margin: const EdgeInsets.only(top: 20),
                 child: _getTopWidget(),
               ),
-              _getFilterWidget(),
-              Align(
-                alignment: Alignment.bottomCenter,
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
-                  height: MediaQuery.of(context).size.height *
-                      (_isPictureMade ? 1 : 0.2),
-                  width: double.infinity,
                   alignment: Alignment.center,
-                  child: _getBottomWidget(),
+                  color: Colors.black.withOpacity(0.7),
+                  child: _isPictureMade
+                      ? Container()
+                      : Container(
+                          alignment: Alignment.bottomCenter,
+                          margin: EdgeInsets.only(
+                              bottom:
+                                  MediaQuery.of(context).size.height * 0.2 + 30,
+                              top: MediaQuery.of(context).size.height * 0.1),
+                          child: CustomPaint(
+                            size: Size(MediaQuery.of(context).size.width * 0.85,
+                                MediaQuery.of(context).size.height),
+                            painter: Hole(),
+                          ),
+                        ),
                 ),
               ),
+              FutureBuilder(
+                  future: _getBottomWidget(),
+                  builder: (context, snapshot) {
+                    return Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        height: MediaQuery.of(context).size.height *
+                            (_isPictureMade ? 1 : 0.2),
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        child: snapshot.data,
+                      ),
+                    );
+                  })
             ],
           ),
         ),
