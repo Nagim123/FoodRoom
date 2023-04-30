@@ -144,7 +144,7 @@ class Detector {
     filteredOutputs.sort((a, b) => b[4].compareTo(a[4]));
 
     int x, y, w, h, cls;
-    List<int> parsedOutput = parsePrediction(listOutputs[0], height, width);
+    List<int> parsedOutput = parsePrediction(filteredOutputs[0], height, width);
     x = parsedOutput[0];
     y = parsedOutput[1];
     w = parsedOutput[2];
