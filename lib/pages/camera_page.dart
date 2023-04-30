@@ -110,8 +110,8 @@ class _CameraPage extends State<CameraPage> {
     if (_isPictureMade) {
       Image imageFile = Image.file(File(_currentImage.path));
 
-      Prediction prediction =
-          await resources.neuralModel.predictByImage(_currentImage.path, _foodDistance, _focalLength);
+      Prediction prediction = await resources.neuralModel
+          .predictByImage(_currentImage.path, _foodDistance, _focalLength);
       return FruitControlWidget(
         onFoodSaveSuccess: (foodRecord) =>
             widget.onRecordMakeSucess(foodRecord),
@@ -122,13 +122,6 @@ class _CameraPage extends State<CameraPage> {
     }
 
     return Container();
-    return SizedBox(
-      width: double.infinity,
-      height: 150,
-      child: CameraControlWidget(
-        onPressed: () => cameraPreviewWidgetController.takePhoto()
-      ),
-    );
   }
 
   @override
@@ -165,30 +158,39 @@ class _CameraPage extends State<CameraPage> {
                 margin: const EdgeInsets.only(top: 20),
                 child: _getTopWidget(),
               ),
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  alignment: Alignment.center,
-                  color: Colors.black.withOpacity(0.7),
-                  child: _isPictureMade
-                      ? Container()
-                      : Container(
-                          alignment: Alignment.bottomCenter,
-                          margin: EdgeInsets.only(
-                              bottom:
-                                  MediaQuery.of(context).size.height * 0.2 + 30,
-                              top: MediaQuery.of(context).size.height * 0.1),
-                          child: CustomPaint(
-                            size: Size(MediaQuery.of(context).size.width * 0.85,
-                                MediaQuery.of(context).size.height),
-                            painter: Hole(),
-                          ),
-                        ),
-                ),
-              ),
+              // BackdropFilter(
+              //   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              //   child: Container(
+              //     alignment: Alignment.center,
+              //     color: Colors.black.withOpacity(0.7),
+              //     child: _isPictureMade
+              //         ? Container()
+              //         : Container(
+              //             alignment: Alignment.bottomCenter,
+              //             margin: EdgeInsets.only(
+              //                 bottom:
+              //                     MediaQuery.of(context).size.height * 0.2 + 30,
+              //                 top: MediaQuery.of(context).size.height * 0.1),
+              //             child: CustomPaint(
+              //               size: Size(MediaQuery.of(context).size.width * 0.85,
+              //                   MediaQuery.of(context).size.height),
+              //               painter: Hole(),
+              //             ),
+              //           ),
+              //   ),
+              // ),
+              _getFilterWidget(),
               FutureBuilder(
                   future: _getBottomWidget(),
                   builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
                     return Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(

@@ -12,5 +12,9 @@ Future<double> get_focal_length(String path) async {
       return values[0].numerator / values[0].denominator;
     }
   }
+
+  for (final entry in data.entries) {
+    print("${entry.key}:${entry.value}");
+  }
   return 0;
 }
