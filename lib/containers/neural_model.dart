@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:flutter/material.dart';
+import 'package:food_ai/utils/start_initializer.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as imlb;
 
@@ -160,6 +161,11 @@ class Detector {
 
 class NeuralModel {
   final Detector _detector = Detector();
+  late List<dynamic> classesData;
+
+  NeuralModel (){
+    initializeAllFood();
+  }
 
   Future<Prediction> predictByImage(
       String imagePath, double distance, double focalLength) async {
