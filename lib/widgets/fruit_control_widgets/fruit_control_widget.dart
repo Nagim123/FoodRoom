@@ -22,13 +22,13 @@ class FruitControlWidget extends StatefulWidget {
   const FruitControlWidget(
       {super.key,
       required this.currentFoodName,
-      required this.initialMass,
+      required this.initialVolume,
       required this.onFoodSaveSuccess,
       required this.controller});
 
   final Function(FoodRecord) onFoodSaveSuccess;
   final String currentFoodName;
-  final double initialMass;
+  final double initialVolume;
   final FruitControlController controller;
 
   @override
@@ -52,7 +52,7 @@ class _FruitControlWidget extends State<FruitControlWidget> {
         availableFood.length, (index) => availableFood[index].name);
 
     currentFood = availableFood[foodName.indexOf(widget.currentFoodName)];
-    currentMass = widget.initialMass;
+    currentMass = currentFood.resolveMass(widget.initialVolume);
 
     widget.controller.forceExitFunction = () {
       isVisible = false;

@@ -44,7 +44,7 @@ dependencies:
   arcore_flutter_plugin: ^0.1.0
   exif: ^3.1.4
   tflite_flutter: ^0.9.1
-  # tflite_flutter_helper: ^0.3.1
+  csv: ^5.0.2
 
 dev_dependencies:
   flutter_test:

@@ -1,17 +1,18 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:food_ai/utils/start_initializer.dart';
+// import 'package:food_ai/utils/start_initializer.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as imlb;
 
 class Prediction {
   final String foodName;
-  final double mass;
+  final double volume_cm3;
 
-  Prediction(this.foodName, this.mass);
+  Prediction(this.foodName, this.volume_cm3);
 }
 
 class Detector {
@@ -161,10 +162,18 @@ class Detector {
 
 class NeuralModel {
   final Detector _detector = Detector();
-  late List<dynamic> classesData;
+  // late List<dynamic> classesData;
 
-  NeuralModel (){
-    initializeAllFood();
+  // NeuralModel (){
+  //   initializeAllFood();
+  // }
+
+  double calculateElipsoidVolume(double a, double b) {
+    // assume our shape is elipsoid with major axes a, b, c = (a + b) / 2
+    double c = (a + b) / 2;
+    double volume = 4.0 / 3.0 * pi * a * b * c;
+
+    return volume;
   }
 
   Future<Prediction> predictByImage(
@@ -178,11 +187,32 @@ class NeuralModel {
     }
 
     List<int> prediction = _detector.predict(image);
-    int w, h, cls;
-    w = prediction[0];
-    h = prediction[1];
+    int obj_w, obj_h, img_w, img_h, cls;
+    obj_w = prediction[0];
+    obj_h = prediction[1];
     cls = prediction[2];
 
-    return Prediction(_detector._labels[cls], 100);
+    img_w = image.width;
+    img_h = image.height;
+
+    double diagonal_fov_halfed = atan(35.0 / (2.0 * focalLength));
+    double diagonal_pixel_halfed = sqrt(img_h * img_h + img_w * img_w) / 2;
+    double distance_cm = distance * 100;
+    double diagonal_real_halfed = distance_cm * tan(diagonal_fov_halfed);
+    double cm_per_px = diagonal_real_halfed / diagonal_pixel_halfed;
+
+    print("halfed fov: $diagonal_fov_halfed");
+    print("halfed pixel diagonal: $diagonal_pixel_halfed");
+    print("distance cm: $distance_cm");
+    print("halfed real diagonal: $diagonal_real_halfed");
+    print("cm per pixel ratio: $cm_per_px");
+
+    double obj_w_cm = obj_w * cm_per_px;
+    double obj_h_cm = obj_h * cm_per_px;
+    print("Object real-world dimentions: ${obj_h_cm}x${obj_w_cm}");
+
+    double volume_cm3 = calculateElipsoidVolume(obj_w_cm, obj_h_cm);
+
+    return Prediction(_detector._labels[cls], volume_cm3);
   }
 }

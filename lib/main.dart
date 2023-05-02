@@ -19,7 +19,7 @@ Future<void> main() async {
   final cameras = await availableCameras();
   resources = Resources(
     camera: cameras.first,
-    food: initializeAllFood(),
+    food: await initializeAllFood(),
     neuralModel: initilizeNeuralModel(),
     hiveFoodManager: HiveFoodManager(),
   );
