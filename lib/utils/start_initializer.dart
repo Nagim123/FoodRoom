@@ -18,7 +18,7 @@ Future<List<Food>> initializeAllFood() async {
         listData[i][2] / 100,
         listData[i][3] / 100,
         listData[i][4] / 100,
-        listData[i][5] / 100));
+        listData[i][5]));
   }
   // availableFood.add(Food('Апельсин', 0.315, 0.0092, 0.002, 0.11));
   // availableFood.add(Food('Яблоко', 0.522, 0.004, 0.004, 0.116));

@@ -114,6 +114,7 @@ class Detector {
 
     cls = 0;
     var max_cls = 0.0;
+    var conf = prediction[4];
     for (int i = 0 + 5; i < 12 + 5; i++) {
       if (prediction[i] > max_cls) {
         max_cls = prediction[i];
@@ -124,7 +125,7 @@ class Detector {
     return <int>[x, y, w, h, cls];
   }
 
-  List<int> predict(imlb.Image image) {
+  List<int>? predict(imlb.Image image) {
     // [1, 64512, 17] x y w h conf, class1, class2, class3, ..., class 12 = 4 + 1 + 12 = 17 Пиздец
     var inputTensor = imageToInput(image);
     int width, height;
@@ -142,7 +143,9 @@ class Detector {
       }
     });
 
-    // TODO: check for empty list
+    if (filteredOutputs.isEmpty) {
+      return null;
+    }
     filteredOutputs.sort((a, b) => b[4].compareTo(a[4]));
 
     int x, y, w, h, cls;
@@ -152,9 +155,10 @@ class Detector {
     w = parsedOutput[2];
     h = parsedOutput[3];
     cls = parsedOutput[4];
+    double conf = filteredOutputs[0][4];
 
     print(
-        "Predicted class: ${_labels[cls]}, pos: ($x, $y), width: $w px, height: $h px, confidence: ${listOutputs[0][4]}");
+        "Predicted class: ${_labels[cls]}, pos: ($x, $y), width: $w px, height: $h px, confidence: $conf");
 
     return <int>[w, h, cls];
   }
@@ -168,17 +172,31 @@ class NeuralModel {
   //   initializeAllFood();
   // }
 
-  double calculateElipsoidVolume(double a, double b) {
-    // assume our shape is elipsoid with major axes a, b, c = (a + b) / 2
-    double c = (a + b) / 2;
-    double volume = 4.0 / 3.0 * pi * a * b * c;
+  double calculatePixToCmRatio(imgH, imgW, distance, focalLength) {
+    double diagonalFovHalfed = atan(35.0 / (2.0 * focalLength));
+    double diagonalPixelHalfed = sqrt(imgH * imgH + imgW * imgW) / 2;
+    double distanceCm = distance * 100;
+    double diagonalRealHalfed = distanceCm * tan(diagonalFovHalfed);
+
+    print("halfed fov: $diagonalFovHalfed");
+    print("halfed pixel diagonal: $diagonalPixelHalfed");
+    print("distance cm: $distanceCm");
+    print("halfed real diagonal: $diagonalRealHalfed");
+    return diagonalRealHalfed / diagonalPixelHalfed;
+  }
+
+  double calculateElipsoidVolume(double a2, double b2) {
+    // initially a2, b2, c2 are "diameters"
+    // assume our shape is an elipsoid with major axes a, b, c = (a + b) / 2
+    double c2 = (a2 + b2) / 2;
+    double volume = 4.0 / 3.0 * pi * a2/2 * b2/2 * c2/2;
 
     return volume;
   }
 
   Future<Prediction> predictByImage(
       String imagePath, double distance, double focalLength) async {
-    print("GOT DISTANCE:$distance and focallll ${focalLength}");
+    print("got distance: $distance and focalLength: $focalLength");
     imlb.Image? image = await imlb.decodeImageFile(imagePath);
 
     if (image == null) {
@@ -186,33 +204,29 @@ class NeuralModel {
       return Prediction("Помидор", 100);
     }
 
-    List<int> prediction = _detector.predict(image);
-    int obj_w, obj_h, img_w, img_h, cls;
-    obj_w = prediction[0];
-    obj_h = prediction[1];
+    List<int>? prediction = _detector.predict(image);
+    if (prediction == null) {
+      print("No objects detected");
+      return Prediction("Помидор", 404);
+    }
+    int objW, objH, imgW, imgH, cls;
+    objW = prediction[0];
+    objH = prediction[1];
     cls = prediction[2];
 
-    img_w = image.width;
-    img_h = image.height;
+    imgW = image.width;
+    imgH = image.height;
 
-    double diagonal_fov_halfed = atan(35.0 / (2.0 * focalLength));
-    double diagonal_pixel_halfed = sqrt(img_h * img_h + img_w * img_w) / 2;
-    double distance_cm = distance * 100;
-    double diagonal_real_halfed = distance_cm * tan(diagonal_fov_halfed);
-    double cm_per_px = diagonal_real_halfed / diagonal_pixel_halfed;
+    double cmPerPx = calculatePixToCmRatio(imgH, imgW, distance, focalLength);
+    print("cm per pixel ratio: $cmPerPx");
 
-    print("halfed fov: $diagonal_fov_halfed");
-    print("halfed pixel diagonal: $diagonal_pixel_halfed");
-    print("distance cm: $distance_cm");
-    print("halfed real diagonal: $diagonal_real_halfed");
-    print("cm per pixel ratio: $cm_per_px");
+    double objWCm = objW * cmPerPx;
+    double objHCm = objH * cmPerPx;
+    print("Object real-world dimentions: $objHCm x $objWCm");
 
-    double obj_w_cm = obj_w * cm_per_px;
-    double obj_h_cm = obj_h * cm_per_px;
-    print("Object real-world dimentions: ${obj_h_cm}x${obj_w_cm}");
+    double volumeCm3 = calculateElipsoidVolume(objWCm, objHCm);
+    print("Calculated volume in cm3: $volumeCm3");
 
-    double volume_cm3 = calculateElipsoidVolume(obj_w_cm, obj_h_cm);
-
-    return Prediction(_detector._labels[cls], volume_cm3);
+    return Prediction(_detector._labels[cls], volumeCm3);
   }
 }

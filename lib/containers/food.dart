@@ -15,7 +15,8 @@ class Food {
       this._density_g_cm3);
 
   double resolveMass(double volume_cm3) {
-    return volume_cm3 * _density_g_cm3;
+    print("Mass: ${volume_cm3 * _density_g_cm3}g");
+    return (volume_cm3 * _density_g_cm3).roundToDouble();
   }
 
   String getCalories(double mass) {
