@@ -187,8 +187,12 @@ class NeuralModel {
 
   double calculateElipsoidVolume(double a2, double b2) {
     // initially a2, b2, c2 are "diameters"
-    // assume our shape is an elipsoid with major axes a, b, c = (a + b) / 2
-    double c2 = (a2 + b2) / 2;
+    // assume our shape is an elipsoid with major axes a, b, c = min(a, b)
+
+    // easily can be max(a2, b2)
+    // TODO tube vs pancake (i.e due to radial symmetry we have either two bigger or smaller axis)
+    // can as well ask user what type their fruit is
+    double c2 = min(a2, b2);
     double volume = 4.0 / 3.0 * pi * a2/2 * b2/2 * c2/2;
 
     return volume;
