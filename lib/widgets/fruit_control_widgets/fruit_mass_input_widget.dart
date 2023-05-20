@@ -47,7 +47,6 @@ class FruitMassInputWidget extends StatelessWidget {
                   'г',
                   style: TextStyle(color: Colors.white, fontSize: 17),
                 ),
-                //counterText: 'г',
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.white, width: 2.0),
                 ),

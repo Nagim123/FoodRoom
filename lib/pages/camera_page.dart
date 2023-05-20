@@ -1,19 +1,19 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:food_ai/containers/food_recording.dart';
 import 'package:food_ai/containers/neural_model.dart';
-import 'package:food_ai/containers/resources.dart';
-import 'package:food_ai/utils/focal_len_getter.dart';
-import 'package:food_ai/widgets/camera_control_widgets/camera_preview_widget.dart';
+import 'package:food_ai/utils/isolated_model.dart';
+import 'package:food_ai/widgets/dialogues/custom_alert_dialogue.dart';
 import 'package:food_ai/widgets/fruit_control_widgets/fruit_control_widget.dart';
 import 'package:food_ai/widgets/camera_control_widgets/ar_core_widget.dart';
 
 import '../painters/hole_painter.dart';
 import '../widgets/camera_control_widgets/camera_control_widget.dart';
 import '../widgets/image_preview_widget.dart';
+import '../containers/resources.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({super.key, required this.onRecordMakeSucess});
@@ -25,15 +25,15 @@ class CameraPage extends StatefulWidget {
 }
 
 class _CameraPage extends State<CameraPage> {
-  late CameraPreviewWidgetController cameraPreviewWidgetController;
+  late ArCoreWidgetController arCoreWidgetController;
   final FruitControlController fruitControlController =
       FruitControlController();
-  late XFile _currentImage;
+  late File _currentImage;
   late double _foodDistance;
-
+  late bool _planeScanned;
   late bool _isPictureMade;
-  late bool _wasTapped;
-  late double _focalLength;
+
+  Prediction? modelPrediction;
 
   bool isVisibleMagic = false;
 
@@ -41,42 +41,37 @@ class _CameraPage extends State<CameraPage> {
   void initState() {
     super.initState();
     _isPictureMade = false;
-    _wasTapped = false;
-    _focalLength = 0;
-    cameraPreviewWidgetController = CameraPreviewWidgetController();
+    _planeScanned = false;
+    arCoreWidgetController = ArCoreWidgetController();
   }
 
   Widget _getTopWidget() {
-    if (_wasTapped == false) {
-      return ArCoreWidget(onDistanceReady: (distance) {
-        _wasTapped = true;
-        _foodDistance = distance;
-        setState(() {});
-      });
-    }
-
     if (_isPictureMade) {
       return ImagePreviewWidget(file: _currentImage);
+    } else {
+      return ArCoreWidget(
+        controller: arCoreWidgetController,
+        onPlaneDetected: () {
+          if (_planeScanned == false) {
+            _planeScanned = true;
+            setState(() {});
+          }
+        },
+        onDistanceReady: (distance) async {
+          _currentImage = File(await arCoreWidgetController.takePhoto());
+          _isPictureMade = true;
+          _foodDistance = distance;
+          setState(() {});
+        },
+        onDistanceFailed: () {
+          showCustomAlert(context,
+              "Убедитесь, что продукт находиться по центру отсканированной поверхности");
+        },
+      );
     }
-    return CameraPreviewWidget(
-      controller: cameraPreviewWidgetController,
-      onPhotoReady: (XFile image) async {
-        _focalLength = await get_focal_length(image.path);
-        _currentImage = image;
-        _isPictureMade = true;
-        setState(() {});
-      },
-    );
   }
 
   Widget _getFilterWidget() {
-    if (_wasTapped == false) {
-      return const SizedBox(
-        width: 1,
-        height: 1,
-      );
-    }
-
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
       child: Container(
@@ -99,29 +94,47 @@ class _CameraPage extends State<CameraPage> {
     );
   }
 
-  Future<Widget> _getBottomWidget() async {
-    if (_wasTapped == false) {
-      return const SizedBox(
-        width: 1,
-        height: 1,
-      );
-    }
-
-    if (_isPictureMade) {
-      Image imageFile = Image.file(File(_currentImage.path));
-
-      Prediction prediction = await resources.neuralModel
-          .predictByImage(_currentImage.path, _foodDistance, _focalLength);
+  Widget _getBottomWidget() {
+    //Scanning logic
+    if (modelPrediction != null) {
       return FruitControlWidget(
         onFoodSaveSuccess: (foodRecord) =>
             widget.onRecordMakeSucess(foodRecord),
-        currentFoodName: prediction.foodName,
-        initialVolume: prediction.volume_cm3,
+        currentFoodName: modelPrediction!.foodName,
+        initialMass: modelPrediction!.volume_cm3,
         controller: fruitControlController,
       );
     }
 
-    return Container();
+    if (_isPictureMade) {
+      resources.model.getPrediction((prediction) {
+        modelPrediction = prediction;
+        setState(() {});
+      }, _currentImage.path, _foodDistance, resources.focalLength);
+      return const Align(
+        alignment: Alignment.center,
+        child: SizedBox(
+          height: 60,
+          width: 60,
+          child: CircularProgressIndicator(
+              color: Color.fromARGB(255, 107, 86, 120)),
+        ),
+      );
+    }
+    if (_planeScanned) {
+      return CameraControlWidget(onPressed: () async {
+        arCoreWidgetController.forceTap();
+      });
+    }
+
+    return const Text(
+      "Обработка поверхности...",
+      style: TextStyle(
+          fontSize: 17,
+          color: Color.fromARGB(255, 97, 99, 106),
+          fontFamily: "Raleway",
+          fontWeight: FontWeight.w900),
+    );
   }
 
   @override
@@ -158,50 +171,17 @@ class _CameraPage extends State<CameraPage> {
                 margin: const EdgeInsets.only(top: 20),
                 child: _getTopWidget(),
               ),
-              // BackdropFilter(
-              //   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              //   child: Container(
-              //     alignment: Alignment.center,
-              //     color: Colors.black.withOpacity(0.7),
-              //     child: _isPictureMade
-              //         ? Container()
-              //         : Container(
-              //             alignment: Alignment.bottomCenter,
-              //             margin: EdgeInsets.only(
-              //                 bottom:
-              //                     MediaQuery.of(context).size.height * 0.2 + 30,
-              //                 top: MediaQuery.of(context).size.height * 0.1),
-              //             child: CustomPaint(
-              //               size: Size(MediaQuery.of(context).size.width * 0.85,
-              //                   MediaQuery.of(context).size.height),
-              //               painter: Hole(),
-              //             ),
-              //           ),
-              //   ),
-              // ),
               _getFilterWidget(),
-              FutureBuilder(
-                  future: _getBottomWidget(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox(
-                        width: 60,
-                        height: 60,
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-
-                    return Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        height: MediaQuery.of(context).size.height *
-                            (_isPictureMade ? 1 : 0.2),
-                        width: double.infinity,
-                        alignment: Alignment.center,
-                        child: snapshot.data,
-                      ),
-                    );
-                  })
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: MediaQuery.of(context).size.height *
+                      (_isPictureMade ? 1 : 0.2),
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  child: _getBottomWidget(),
+                ),
+              )
             ],
           ),
         ),

@@ -1,19 +1,22 @@
-import 'package:camera/camera.dart';
+import 'dart:ui';
+
 import 'package:food_ai/containers/food.dart';
-import 'package:food_ai/containers/neural_model.dart';
 import 'package:food_ai/utils/hive_food_manager.dart';
+import 'package:food_ai/utils/isolated_model.dart';
 
 class Resources {
-  final CameraDescription camera;
   final List<Food> food;
-  final NeuralModel neuralModel;
   final HiveFoodManager hiveFoodManager;
+  final Size screenSize;
+  final double focalLength;
+  final IsolatedModel model;
 
   Resources(
-      {required this.camera,
-      required this.food,
-      required this.neuralModel,
-      required this.hiveFoodManager});
+      {required this.food,
+      required this.hiveFoodManager,
+      required this.screenSize,
+      required this.focalLength,
+      required this.model});
 }
 
 late Resources resources;
