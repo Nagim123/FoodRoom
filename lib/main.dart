@@ -16,7 +16,7 @@ Future<void> main() async {
   // can be called before `runApp()`
   WidgetsFlutterBinding.ensureInitialized();
   resources = Resources(
-      food: initializeAllFood(),
+      food: await initializeAllFood(),
       hiveFoodManager: HiveFoodManager(),
       model: IsolatedModel(),
       screenSize: WidgetsBinding.instance.window.physicalSize,

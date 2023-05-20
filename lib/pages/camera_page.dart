@@ -101,7 +101,7 @@ class _CameraPage extends State<CameraPage> {
         onFoodSaveSuccess: (foodRecord) =>
             widget.onRecordMakeSucess(foodRecord),
         currentFoodName: modelPrediction!.foodName,
-        initialMass: modelPrediction!.volume_cm3,
+        initialVolume: modelPrediction!.volume_cm3,
         controller: fruitControlController,
       );
     }

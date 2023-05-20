@@ -16,7 +16,7 @@ void _modelIsolatedHandler(SendPort sendPort) {
     double focalLength = args[2] as double;
     Prediction prediction =
         await neuralModel.predictByImage(imgPath, foodDistance, focalLength);
-    List<dynamic> results = [prediction.foodName, prediction.mass];
+    List<dynamic> results = [prediction.foodName, prediction.volume_cm3];
     sendPort.send(results);
   });
 }
