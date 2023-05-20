@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'package:food_ai/containers/record_pointers.dart';
 import 'package:food_ai/pages/daily_records_page.dart';
+import 'package:food_ai/utils/focal_len_getter.dart';
 import 'package:food_ai/utils/hive_food_manager.dart';
+import 'package:food_ai/utils/isolated_model.dart';
 import 'package:food_ai/utils/start_initializer.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -12,18 +13,16 @@ import 'containers/food_adapters.dart';
 import 'containers/resources.dart';
 
 Future<void> main() async {
-  // Ensure that plugin services are initialized so that `availableCameras()`
   // can be called before `runApp()`
   WidgetsFlutterBinding.ensureInitialized();
-  // Obtain a list of the available cameras on the device.
-  final cameras = await availableCameras();
   resources = Resources(
-    camera: cameras.first,
-    food: initializeAllFood(),
-    neuralModel: initilizeNeuralModel(),
-    hiveFoodManager: HiveFoodManager(),
-  );
+      food: initializeAllFood(),
+      hiveFoodManager: HiveFoodManager(),
+      model: IsolatedModel(),
+      screenSize: WidgetsBinding.instance.window.physicalSize,
+      focalLength: await getFocalLength());
 
+  print("FOCAL LEN:${resources.focalLength}");
   Directory dir = await getApplicationDocumentsDirectory();
 
   Hive.init(dir.path);

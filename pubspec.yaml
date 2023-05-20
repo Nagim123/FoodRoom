@@ -40,10 +40,13 @@ dependencies:
   build_runner: ^2.1.8
   path_provider: ^2.0.13
   intl: ^0.18.0
-  arcore_flutter_plugin: ^0.1.0
+  arcore_flutter_plugin:
+    git:
+      url: "https://github.com/Nagim123/arcore_flutter_plugin_patch"
   exif: ^3.1.4
   tflite_flutter: ^0.9.1
   # tflite_flutter_helper: ^0.3.1
+  flutter_isolate: ^2.0.4
 
 dev_dependencies:
   flutter_test:

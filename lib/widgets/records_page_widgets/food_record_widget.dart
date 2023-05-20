@@ -15,7 +15,8 @@ class FoodRecordWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       child: Row(
         children: [
           Expanded(
@@ -42,25 +43,19 @@ class FoodRecordWidget extends StatelessWidget {
             ),
           ),
           Expanded(flex: 2, child: Container()),
-          Expanded(
+          const Expanded(
               flex: 1,
               child: SizedBox(
                 height: 32,
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: InkWell(
-                    splashColor: const Color.fromARGB(50, 115, 91, 237),
-                    child: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 12,
-                    ),
-                    onTap: () => showFoodPreview(
-                        context, foodRecord, recordCluster, dayRecording),
-                  ),
+                child: Icon(
+                  Icons.arrow_forward_ios,
+                  size: 12,
                 ),
               )),
         ],
       ),
+      onTap: () =>
+          showFoodPreview(context, foodRecord, recordCluster, dayRecording),
     );
   }
 }
