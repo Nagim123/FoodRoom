@@ -1,16 +1,18 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/services.dart' show rootBundle;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+// import 'package:food_ai/utils/start_initializer.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as imlb;
 
 class Prediction {
   final String foodName;
-  final double mass;
+  final double volume_cm3;
 
-  Prediction(this.foodName, this.mass);
+  Prediction(this.foodName, this.volume_cm3);
 }
 
 class Detector {
@@ -112,6 +114,7 @@ class Detector {
 
     cls = 0;
     var max_cls = 0.0;
+    var conf = prediction[4];
     for (int i = 0 + 5; i < 12 + 5; i++) {
       if (prediction[i] > max_cls) {
         max_cls = prediction[i];
@@ -122,7 +125,7 @@ class Detector {
     return <int>[x, y, w, h, cls];
   }
 
-  List<int> predict(imlb.Image image) {
+  List<int>? predict(imlb.Image image) {
     // [1, 64512, 17] x y w h conf, class1, class2, class3, ..., class 12 = 4 + 1 + 12 = 17 Пиздец
     var inputTensor = imageToInput(image);
     int width, height;
@@ -140,19 +143,22 @@ class Detector {
       }
     });
 
-    // TODO: check for empty list
+    if (filteredOutputs.isEmpty) {
+      return null;
+    }
     filteredOutputs.sort((a, b) => b[4].compareTo(a[4]));
 
     int x, y, w, h, cls;
-    List<int> parsedOutput = parsePrediction(listOutputs[0], height, width);
+    List<int> parsedOutput = parsePrediction(filteredOutputs[0], height, width);
     x = parsedOutput[0];
     y = parsedOutput[1];
     w = parsedOutput[2];
     h = parsedOutput[3];
     cls = parsedOutput[4];
+    double conf = filteredOutputs[0][4];
 
     print(
-        "Predicted class: ${_labels[cls]}, pos: ($x, $y), width: $w px, height: $h px, confidence: ${listOutputs[0][4]}");
+        "Predicted class: ${_labels[cls]}, pos: ($x, $y), width: $w px, height: $h px, confidence: $conf");
 
     return <int>[w, h, cls];
   }
@@ -160,10 +166,41 @@ class Detector {
 
 class NeuralModel {
   final Detector _detector = Detector();
+  // late List<dynamic> classesData;
+
+  // NeuralModel (){
+  //   initializeAllFood();
+  // }
+
+  double calculatePixToCmRatio(imgH, imgW, distance, focalLength) {
+    double diagonalFovHalfed = atan(35.0 / (2.0 * focalLength));
+    double diagonalPixelHalfed = sqrt(imgH * imgH + imgW * imgW) / 2;
+    double distanceCm = distance * 100;
+    double diagonalRealHalfed = distanceCm * tan(diagonalFovHalfed);
+
+    print("halfed fov: $diagonalFovHalfed");
+    print("halfed pixel diagonal: $diagonalPixelHalfed");
+    print("distance cm: $distanceCm");
+    print("halfed real diagonal: $diagonalRealHalfed");
+    return diagonalRealHalfed / diagonalPixelHalfed;
+  }
+
+  double calculateElipsoidVolume(double a2, double b2) {
+    // initially a2, b2, c2 are "diameters"
+    // assume our shape is an elipsoid with major axes a, b, c = min(a, b)
+
+    // easily can be max(a2, b2)
+    // TODO tube vs pancake (i.e due to radial symmetry we have either two bigger or smaller axis)
+    // can as well ask user what type their fruit is
+    double c2 = min(a2, b2);
+    double volume = 4.0 / 3.0 * pi * a2/2 * b2/2 * c2/2;
+
+    return volume;
+  }
 
   Future<Prediction> predictByImage(
       String imagePath, double distance, double focalLength) async {
-    print("GOT DISTANCE:$distance and focallll ${focalLength}");
+    print("got distance: $distance and focalLength: $focalLength");
     imlb.Image? image = await imlb.decodeImageFile(imagePath);
 
     if (image == null) {
@@ -171,12 +208,29 @@ class NeuralModel {
       return Prediction("Помидор", 100);
     }
 
-    List<int> prediction = _detector.predict(image);
-    int w, h, cls;
-    w = prediction[0];
-    h = prediction[1];
+    List<int>? prediction = _detector.predict(image);
+    if (prediction == null) {
+      print("No objects detected");
+      return Prediction("Помидор", 404);
+    }
+    int objW, objH, imgW, imgH, cls;
+    objW = prediction[0];
+    objH = prediction[1];
     cls = prediction[2];
 
-    return Prediction(_detector._labels[cls], 100);
+    imgW = image.width;
+    imgH = image.height;
+
+    double cmPerPx = calculatePixToCmRatio(imgH, imgW, distance, focalLength);
+    print("cm per pixel ratio: $cmPerPx");
+
+    double objWCm = objW * cmPerPx;
+    double objHCm = objH * cmPerPx;
+    print("Object real-world dimentions: $objHCm x $objWCm");
+
+    double volumeCm3 = calculateElipsoidVolume(objWCm, objHCm);
+    print("Calculated volume in cm3: $volumeCm3");
+
+    return Prediction(_detector._labels[cls], volumeCm3);
   }
 }

@@ -4,9 +4,20 @@ class Food {
   final double _proteinCoefficient;
   final double _fatCoefficient;
   final double _carbohydratesCoefficient;
+  final double _density_g_cm3;
 
-  Food(this.name, this._caloriesCoefficient, this._proteinCoefficient,
-      this._fatCoefficient, this._carbohydratesCoefficient);
+  Food(
+      this.name,
+      this._caloriesCoefficient,
+      this._proteinCoefficient,
+      this._fatCoefficient,
+      this._carbohydratesCoefficient,
+      this._density_g_cm3);
+
+  double resolveMass(double volume_cm3) {
+    print("Mass: ${volume_cm3 * _density_g_cm3}g");
+    return (volume_cm3 * _density_g_cm3).roundToDouble();
+  }
 
   String getCalories(double mass) {
     return (mass * _caloriesCoefficient).toStringAsFixed(2);

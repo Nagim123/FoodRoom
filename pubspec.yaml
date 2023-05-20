@@ -45,6 +45,7 @@ dependencies:
       url: "https://github.com/Nagim123/arcore_flutter_plugin_patch"
   exif: ^3.1.4
   tflite_flutter: ^0.9.1
+  csv: ^5.0.2
   # tflite_flutter_helper: ^0.3.1
   flutter_isolate: ^2.0.4
 
