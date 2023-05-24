@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:food_ai/containers/food_recording.dart';
 import 'package:food_ai/containers/neural_model.dart';
 import 'package:food_ai/utils/isolated_model.dart';
+import 'package:food_ai/widgets/aim_widget.dart';
 import 'package:food_ai/widgets/dialogues/custom_alert_dialogue.dart';
 import 'package:food_ai/widgets/fruit_control_widgets/fruit_control_widget.dart';
 import 'package:food_ai/widgets/camera_control_widgets/ar_core_widget.dart';
@@ -181,7 +182,13 @@ class _CameraPage extends State<CameraPage> {
                   alignment: Alignment.center,
                   child: _getBottomWidget(),
                 ),
-              )
+              ),
+              (_isPictureMade || !_planeScanned) //Aim
+                  ? Container()
+                  : const Align(
+                      alignment: Alignment.center,
+                      child: AimWidget(),
+                    )
             ],
           ),
         ),
