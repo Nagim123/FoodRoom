@@ -185,9 +185,14 @@ class _CameraPage extends State<CameraPage> {
               ),
               (_isPictureMade || !_planeScanned) //Aim
                   ? Container()
-                  : const Align(
-                      alignment: Alignment.center,
-                      child: AimWidget(),
+                  : Positioned(
+                      top: (resources.screenSize.height / 2) /
+                              resources.screenRatio -
+                          40,
+                      left: (resources.screenSize.width / 2) /
+                              resources.screenRatio -
+                          15,
+                      child: const AimWidget(),
                     )
             ],
           ),

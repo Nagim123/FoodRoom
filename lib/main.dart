@@ -20,6 +20,7 @@ Future<void> main() async {
       hiveFoodManager: HiveFoodManager(),
       model: IsolatedModel(),
       screenSize: WidgetsBinding.instance.window.physicalSize,
+      screenRatio: WidgetsBinding.instance.window.devicePixelRatio,
       focalLength: await getFocalLength());
 
   print("FOCAL LEN:${resources.focalLength}");
@@ -32,6 +33,7 @@ Future<void> main() async {
   await resources.hiveFoodManager.checkAndInitPointersBox();
   await SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+
   runApp(const FoodApp());
 }
 
