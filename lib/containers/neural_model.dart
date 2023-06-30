@@ -110,7 +110,7 @@ class Detector {
     x = (width * prediction[0]).toInt();
     y = (height * prediction[1]).toInt();
     w = (width * prediction[2]).toInt();
-    h = (height * prediction[2]).toInt();
+    h = (height * prediction[3]).toInt();
 
     cls = 0;
     var max_cls = 0.0;
@@ -131,6 +131,7 @@ class Detector {
     int width, height;
     width = image.width;
     height = image.height;
+    print("Image w: $width, h: $height");
     List<List<List<double>>> output =
         List.filled(1, List.filled(64512, List.filled(17, 0.0)));
 
@@ -187,13 +188,13 @@ class NeuralModel {
 
   double calculateElipsoidVolume(double a2, double b2) {
     // initially a2, b2, c2 are "diameters"
-    // assume our shape is an elipsoid with major axes a, b, c = min(a, b)
+    // assume our shape is an elipsoid with major axes a, b, c = (a + b) / 2
 
     // easily can be max(a2, b2)
     // TODO tube vs pancake (i.e due to radial symmetry we have either two bigger or smaller axis)
     // can as well ask user what type their fruit is
-    double c2 = min(a2, b2);
-    double volume = 4.0 / 3.0 * pi * a2/2 * b2/2 * c2/2;
+    double c2 = (a2 + b2) / 2;
+    double volume = 4.0 / 3.0 * pi * a2 / 2 * b2 / 2 * c2 / 2;
 
     return volume;
   }
